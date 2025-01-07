@@ -32,7 +32,7 @@ impl BpxClient {
         let ws_url = self.ws_url.as_deref().unwrap_or(BACKPACK_WS_URL);
         let (mut ws_stream, _) = connect_async(ws_url).await.expect("Error connecting to WebSocket");
         ws_stream
-            .send(Message::Text(subscribe_message.to_string()))
+            .send(Message::text(subscribe_message.to_string()))
             .await
             .expect("Error subscribing to WebSocket");
 
