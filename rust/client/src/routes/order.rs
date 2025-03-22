@@ -29,7 +29,9 @@ impl BpxClient {
     pub async fn execute_order(&self, payload: ExecuteOrderPayload) -> Result<Order> {
         let endpoint = format!("{}{}", self.base_url, API_ORDER);
         let res = self.post(endpoint, payload).await?;
-        res.json().await.map_err(Into::into)
+        let value: serde_json::Value = res.json().await?;
+        println!("{:?}", value);
+        serde_json::from_value(value).map_err(Into::into)
     }
 
     /// Cancels a specific order by symbol and either order ID or client ID.
