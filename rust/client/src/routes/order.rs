@@ -26,7 +26,7 @@ impl BpxClient {
     }
 
     /// Executes a new order with the given payload.
-    pub async fn execute_order(&self, payload: ExecuteOrderPayload) -> Result<Order> {
+    pub async fn execute_order(&self, payload: ExecuteOrderPayload) -> Result<serde_json::Value> {
         let endpoint = format!("{}{}", self.base_url, API_ORDER);
         let res = self.post(endpoint, payload).await?;
         res.json().await.map_err(Into::into)
