@@ -30,7 +30,7 @@ impl BpxClient {
         let endpoint = format!("{}{}", self.base_url, API_ORDER);
         let res = self.post(endpoint, payload).await?;
         let value: serde_json::Value = res.json().await?;
-        println!("{:?}", value);
+        println!("execute_order = {:?}", value);
         serde_json::from_value(value).map_err(Into::into)
     }
 
@@ -61,7 +61,7 @@ impl BpxClient {
         let url = format!("{}{}", self.base_url, API_ORDERS);
         let res = self.delete(url, payload).await?;
         let value: serde_json::Value = res.json().await?;
-        println!("{:?}", value);
+        println!("cancel_open_orders = {:?}", value);
         serde_json::from_value(value).map_err(Into::into)
     }
 }
