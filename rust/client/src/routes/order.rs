@@ -28,11 +28,8 @@ impl BpxClient {
     /// Executes a new order with the given payload.
     pub async fn execute_order(&self, payload: ExecuteOrderPayload) -> Result<Order> {
         let endpoint = format!("{}{}", self.base_url, API_ORDER);
-        let res = self.post(endpoint, payload).await;
-        println!("execute_order res = {:?}", res);
-        let value: serde_json::Value = res?.json().await?;
-        println!("execute_order = {:?}", value);
-        serde_json::from_value(value).map_err(Into::into)
+        let res = self.post(endpoint, payload).await?;
+        res.json().await.map_err(Into::into)
     }
 
     /// Cancels a specific order by symbol and either order ID or client ID.
@@ -61,8 +58,6 @@ impl BpxClient {
     pub async fn cancel_open_orders(&self, payload: CancelOpenOrdersPayload) -> Result<Vec<Order>> {
         let url = format!("{}{}", self.base_url, API_ORDERS);
         let res = self.delete(url, payload).await?;
-        let value: serde_json::Value = res.json().await?;
-        println!("cancel_open_orders = {:?}", value);
-        serde_json::from_value(value).map_err(Into::into)
+        res.json().await.map_err(Into::into)
     }
 }
