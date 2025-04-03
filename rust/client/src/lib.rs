@@ -261,7 +261,13 @@ impl BpxClient {
         let query_params = url.query_pairs().collect::<BTreeMap<Cow<'_, str>, Cow<'_, str>>>();
         let body_params = if let Some(payload) = payload {
             let s = serde_json::to_value(payload)?;
-            serde_json::from_value::<BTreeMap<String, Value>>(s)?
+            match s {
+                Value::Object(map) => map
+                    .into_iter()
+                    .map(|(k, v)| (k, v.to_string()))
+                    .collect::<BTreeMap<_, _>>(),
+                _ => return Err(Error::InvalidRequest("payload must be a JSON object".to_string())),
+            }
         } else {
             BTreeMap::new()
         };
