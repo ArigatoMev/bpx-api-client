@@ -196,7 +196,10 @@ impl BpxClient {
     pub async fn post<P: Serialize, U: IntoUrl>(&self, url: U, payload: P) -> Result<Response> {
         let mut req = self.client.post(url).json(&payload).build()?;
         tracing::debug!("req: {:?}", req);
-        tracing::debug!("req: {:?}", req.body());
+        tracing::debug!(
+            "req: {:?}",
+            String::from_utf8_lossy(req.body().unwrap().as_bytes().unwrap())
+        );
         self.sign(&mut req)?;
         let res = self.client.execute(req).await?;
         Self::process_response(res).await
