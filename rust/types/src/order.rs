@@ -104,8 +104,7 @@ pub struct ExecuteOrderPayload {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub client_id: Option<u32>,
     pub order_type: OrderType,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub post_only: Option<bool>,
+    pub post_only: bool,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub price: Option<Decimal>,
     #[serde(skip_serializing_if = "Option::is_none")]
