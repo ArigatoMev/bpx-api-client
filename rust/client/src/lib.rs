@@ -264,7 +264,14 @@ impl BpxClient {
             match s {
                 Value::Object(map) => map
                     .into_iter()
-                    .map(|(k, v)| (k, v.to_string()))
+                    .map(|(k, v)| {
+                        let v = match v {
+                            Value::Bool(bool) => format!("{:?}", bool.to_string()),
+                            Value::Number(number) => format!("{:?}", number.to_string()),
+                            x => x.to_string(),
+                        };
+                        (k, v)
+                    })
                     .collect::<BTreeMap<_, _>>(),
                 _ => return Err(Error::InvalidRequest("payload must be a JSON object".to_string())),
             }
