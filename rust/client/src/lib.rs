@@ -85,6 +85,7 @@ pub struct BpxClient {
     base_url: String,
     ws_url: Option<String>,
     client: reqwest::Client,
+    window: u32,
 }
 
 impl std::ops::Deref for BpxClient {
@@ -123,6 +124,10 @@ impl BpxClient {
         Self::init_internal(base_url, Some(ws_url), secret, headers)
     }
 
+    pub fn set_window(&mut self, window: u32) {
+        self.window = window;
+    }
+
     /// Internal helper function for client initialization.
     fn init_internal(
         base_url: String,
@@ -153,6 +158,7 @@ impl BpxClient {
             base_url,
             ws_url,
             client,
+            window: DEFAULT_WINDOW,
         })
     }
 
@@ -190,6 +196,7 @@ impl BpxClient {
     pub async fn post<P: Serialize, U: IntoUrl>(&self, url: U, payload: P) -> Result<Response> {
         let mut req = self.client.post(url).json(&payload).build()?;
         tracing::debug!("req: {:?}", req);
+        tracing::debug!("req: {:?}", req.body());
         self.sign(&mut req)?;
         let res = self.client.execute(req).await?;
         Self::process_response(res).await
@@ -254,7 +261,7 @@ impl BpxClient {
         };
 
         let timestamp = now_millis();
-
+        let window = self.window;
         let mut signee = format!("instruction={instruction}");
         for (k, v) in query_params {
             signee.push_str(&format!("&{k}={v}"));
@@ -262,7 +269,7 @@ impl BpxClient {
         for (k, v) in body_params {
             signee.push_str(&format!("&{k}={v}"));
         }
-        signee.push_str(&format!("&timestamp={timestamp}&window={DEFAULT_WINDOW}"));
+        signee.push_str(&format!("&timestamp={timestamp}&window={window}"));
         tracing::debug!("signee: {}", signee);
 
         let signature: Signature = self.signer.sign(signee.as_bytes());
@@ -271,8 +278,7 @@ impl BpxClient {
         req.headers_mut().insert(SIGNATURE_HEADER, signature.parse()?);
         req.headers_mut()
             .insert(TIMESTAMP_HEADER, timestamp.to_string().parse()?);
-        req.headers_mut()
-            .insert(WINDOW_HEADER, DEFAULT_WINDOW.to_string().parse()?);
+        req.headers_mut().insert(WINDOW_HEADER, window.to_string().parse()?);
 
         if matches!(req.method(), &Method::POST | &Method::DELETE) {
             req.headers_mut().insert(CONTENT_TYPE, JSON_CONTENT.parse()?);
